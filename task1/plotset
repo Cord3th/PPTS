@@ -1,0 +1,7 @@
+set xlabel 'Mode'                             
+set ylabel 'Time' 
+set terminal svg size 600,500
+set output 'plot.svg'
+set title ""
+set xtics("ijk" 0, "ikj" 1, "kij" 2, "jik" 3, "jki" 4, "kji" 5)
+plot "dat.txt" with lines
