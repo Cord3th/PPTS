@@ -25,4 +25,4 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Test
-        run: ./task1/make test.
+        run: make -C ./task1 test.
