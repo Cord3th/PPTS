@@ -6,7 +6,7 @@ const int w = 8;
 using namespace std;
 int main(int argc, char** argv) {
 	if (argc != 3) {
-		cout << "format: iput.dat otput.txt" << endl;
+		cout << "Format: iput.dat otput.txt" << endl;
 		return 1;
 	}
 	fstream fin;
@@ -17,8 +17,8 @@ int main(int argc, char** argv) {
 	uint64_t n, m, i, j;
 	fin.read((char *) &n, sizeof(n));
 	fin.read((char *) &m, sizeof(m));
-	for(i = 0 ; i < n; ++i) {
-		for (j = 0 ; j < m; ++j) {
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < m; j++) {
 			if (type == 'f') {
 				float tmp;
 				fin.read((char *) &tmp, sizeof(tmp));
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 				fin.read((char *) &tmp, sizeof(tmp));
 				fout << setw(w) << tmp << ' ';
 			} else {
-				cout << "error matr" << endl;
+				cerr << "Matrices type error" << endl;
 				return 2;
 			}
 		}
@@ -36,7 +36,6 @@ int main(int argc, char** argv) {
 	}
 	fin.close();
 	fout.close();
-
 
 	return 0;
 }

@@ -3,43 +3,44 @@
 #include <cstdlib>
 #include <cstdint>
 #include <iomanip>
+
 using namespace std;
 
-template <typename Atype, typename Btype, typename Ctype>
-void mulmatr(fstream &a, fstream &b, fstream &c, int &r){
-	uint64_t na, ma, nb, mb, i, j, k;
-	a.read((char *) &na, sizeof(na));
-	a.read((char *) &ma, sizeof(ma));
-	b.read((char *) &nb, sizeof(nb));
-	b.read((char *) &mb, sizeof(mb));
-	if (ma != nb) {
-		cout << "cant multiply matrs because of size\n";
+template <typename Mtype>
+void mulmatr(fstream &a, fstream &b, fstream &c, int &mode){
+	uint64_t A_rows, A_cols, B_rows, B_cols, i, j, k;
+	a.read((char *) &A_rows, sizeof(A_rows));
+	a.read((char *) &A_cols, sizeof(A_cols));
+	b.read((char *) &B_rows, sizeof(B_rows));
+	b.read((char *) &B_cols, sizeof(B_cols));
+	if (A_cols != B_rows) {
+		cerr << "Size incompatibility \n";
 		return;
 	}
-	Atype **matra = new Atype*[na];
-	Btype **matrb = new Btype*[nb];
-	Ctype **matrc = new Ctype*[na];
-	for (i = 0; i < na; ++i) {
-		matra[i] = new Atype[ma];
-		matrc[i] = new Ctype[mb];
+	Mtype **A = new Mtype*[A_rows];
+	Mtype **B = new Mtype*[B_rows];
+	Mtype **C = new Mtype*[A_rows];
+	for (i = 0; i < A_rows; i++) {
+		A[i] = new Mtype[A_cols];
+		C[i] = new Mtype[B_cols];
 	}
-	for (i = 0; i < nb; ++i) {
-		matrb[i] = new Btype[mb];
+	for (i = 0; i < B_rows; i++) {
+		B[i] = new Mtype[B_cols];
 	}
 
-	for (i = 0 ; i < na; ++i) {
-		for(j = 0; j < ma; ++j) {
-			a.read((char *) &matra[i][j], sizeof(matra[i][j]));
+	for (i = 0; i < A_rows; i++) {
+		for (j = 0; j < A_cols; j++) {
+			a.read((char *) &A[i][j], sizeof(A[i][j]));
 		}
 	}
-	for (i = 0 ; i < nb; ++i){
-		for (j = 0; j < mb; ++j) {
-			b.read((char *) &matrb[i][j], sizeof(matrb[i][j]));
+	for (i = 0; i < B_rows; i++){
+		for (j = 0; j < B_cols; j++) {
+			b.read((char *) &B[i][j], sizeof(B[i][j]));
 		}
 	}
-	for( i = 0 ; i < na; ++i) {
-		for(j = 0 ; j < mb; ++j) {
-			matrc[i][j] = 0;
+	for (i = 0; i < A_rows; i++) {
+		for (j = 0; j < B_cols; j++) {
+			C[i][j] = 0;
 		}
 	}
 
@@ -47,135 +48,131 @@ void mulmatr(fstream &a, fstream &b, fstream &c, int &r){
 	dat.open("dat.txt", ios::out | ios::app);
 
 	clock_t time;
-	switch (r) {
-		case 0 :
+	switch (mode) {
+		case 0:
 			time = clock();
-			for(i = 0 ; i < na; ++i) {
-				for( j = 0 ; j < mb; ++j) {
-					for ( k = 0; k < ma; ++k) {
-						matrc[i][j] += matra[i][k] * matrb[k][j];
+			for (i = 0; i < A_rows; i++) {
+				for (j = 0; j < B_cols; j++) {
+					for (k = 0; k < A_cols; k++) {
+						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
 			time -= clock();
 			break;
-		case 1 :
+		case 1:
 			time = clock();
-			for(i = 0 ; i < na; ++i) {
-				for( k = 0 ; k < ma; ++k) {
-					for ( j = 0; j < mb; ++j) {
-						matrc[i][j] += matra[i][k] * matrb[k][j];
+			for (i = 0; i < A_rows; i++) {
+				for (k = 0; k < A_cols; k++) {
+					for (j = 0; j < B_cols; j++) {
+						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
 			time -= clock();
 			break;
-		case 2 :
+		case 2:
 			time = clock();
-			for(k = 0 ; k < ma; ++k) {
-				for( i = 0 ; i < na; ++i) {
-					for ( j = 0; j < mb; ++j) {
-						matrc[i][j] += matra[i][k] * matrb[k][j];
+			for (k = 0; k < A_cols; k++) {
+				for (i = 0; i < A_rows; i++) {
+					for (j = 0; j < B_cols; j++) {
+						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
 			time -= clock();
 			break;
-		case 3 :
+		case 3:
 			time = clock();
-			for(j = 0 ; j < mb; ++j) {
-				for( i = 0 ; i < na; ++i) {
-					for ( k = 0; k < ma; ++k) {
-						matrc[i][j] += matra[i][k] * matrb[k][j];
+			for (j = 0; j < B_cols; j++) {
+				for (i = 0; i < A_rows; i++) {
+					for (k = 0; k < A_cols; k++) {
+						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
 			time -= clock();
 			break;
-		case 4 :
+		case 4:
 			time = clock();
-			for(j = 0 ; j < mb; ++j) {
-				for( k = 0 ; k < ma; ++k) {
-					for ( i = 0; i < na; ++i) {
-						matrc[i][j] += matra[i][k] * matrb[k][j];
+			for (j = 0; j < B_cols; j++) {
+				for (k = 0; k < A_cols; k++) {
+					for (i = 0; i < A_rows; i++) {
+						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
 			time -= clock();
 			break;
-		case 5 :
+		case 5:
 			time = clock();
-			for(k = 0 ; k < ma; ++k) {
-				for( j = 0 ; j < mb; ++j) {
-					for ( i = 0; i < na; ++i) {
-						matrc[i][j] += matra[i][k] * matrb[k][j];
+			for (k = 0; k < A_cols; k++) {
+				for (j = 0; j < B_cols; j++) {
+					for (i = 0; i < A_rows; i++) {
+						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
 			time -= clock();
 			break;
-		default : 
-			cout << "error: mode" << r << endl;
+		default :
+			cerr << "Error: mode" << mode << endl;
 			return;
 	}
-	dat << r << ' ' << fixed << setprecision(6) << ((double) -time)/CLOCKS_PER_SEC << endl;
+	dat << mode << ' ' << fixed << setprecision(6) << ((double) -time) / CLOCKS_PER_SEC << endl;
 	char type;
-	if ( sizeof(Ctype) == sizeof(double)) {
+	if (sizeof(Mtype) == sizeof(double)) {
 		type = 'd';
 	} else {
 		type = 'f';
 	}
 
 	c.write((char*) &type, sizeof(type));
-	c.write((char*) &na, sizeof(na));
-	c.write((char*) &mb, sizeof(mb));
-	for (i = 0 ; i < na; ++i) {
-		for ( j = 0; j < mb; ++j) {
-			c.write((char*) &matrc[i][j], sizeof(matrc[i][j]));
+	c.write((char*) &A_rows, sizeof(A_rows));
+	c.write((char*) &B_cols, sizeof(B_cols));
+	for (i = 0; i < A_rows; i++) {
+		for (j = 0; j < B_cols; j++) {
+			c.write((char*) &C[i][j], sizeof(C[i][j]));
 		}
 	}
 
 
-	for (i = 0; i < na; ++i) {
-		delete []matra[i];
-		delete []matrc[i];
+	for (i = 0; i < A_rows; i++) {
+		delete []A[i];
+		delete []C[i];
 	}
-	for (i = 0; i < nb; ++i) {
-		delete []matrb[i];
+	for (i = 0; i < B_rows; i++) {
+		delete []B[i];
 	}
-	delete []matra;
-	delete []matrb;
-	delete []matrc;
+	delete []A;
+	delete []B;
+	delete []C;
 }
 
 int main(int argc, char **argv) {
 	//ijk ikj kij jik jki kji
-	
+
 	if (argc != 5) {
-		cout << "format: A.dat B.dat input.dat 0/1/2/3/4/5" << endl;
+		cout << "Format: A.dat B.dat input.dat 0/1/2/3/4/5" << endl;
 		return 0;
 	}
 
-	fstream a,b,c;
+	fstream a, b, c;
 	a.open(argv[1], ios::in | ios::binary);
 	b.open(argv[2], ios::in | ios::binary);
 	char ta, tb;
 
 	c.open(argv[3], ios::out | ios::binary);
-	int r;
-	sscanf(argv[4], "%d", &r);
+	int mode;
+	sscanf(argv[4], "%d", &mode);
 	a.read(&ta, sizeof(ta));
 	b.read(&tb, sizeof(tb));
 	if (ta == 'f' && tb == 'f') {
-		mulmatr <float, float, float>(a, b, c, r);
-	} else if(ta == 'f' && tb == 'd'){
-		mulmatr <float, double, double>(a, b, c, r);
-	} else if(ta == 'd' && tb == 'f') {
-		mulmatr <double, float, double>(a, b, c, r);
-	} else if ( ta == 'd' && tb == 'd') {
-		mulmatr <double, double, double>(a, b, c, r);
+		mulmatr<float>(a, b, c, mode);
+	} else if (ta = 'd' && tb == 'd') {
+		mulmatr<double>(a, b, c, mode);
 	} else {
-		cout << "error with types of matrs" << endl;
+		cerr << "Matrices type error" << endl;
 	}
 	a.close();
 	b.close();
