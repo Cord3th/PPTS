@@ -25,7 +25,7 @@ int main(int argc, char ** argv) {
 		cout << "Type diff\n";
 		f1.close();
 		f2.close();
-		throw -1;
+		//throw -1;
 		return 1;
 	}
 	f1.read((char *) &n, sizeof(n));
@@ -34,7 +34,7 @@ int main(int argc, char ** argv) {
 		cout << "Size diff\n";
 		f1.close();
 		f2.close();
-		throw -1;
+		//throw -1;
 		return 1;
 	}
 	f1.read((char *) &m, sizeof(m));
@@ -43,7 +43,7 @@ int main(int argc, char ** argv) {
 		cout << "Size diff\n";
 		f1.close();
 		f2.close();
-		throw -1;
+		//throw -1;
 		return 1;
 	}
 	if (type1 == 'f') {
@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
 					cout << "Elements diff\n";
 					f1.close();
 					f2.close();
-					throw -1;
+					//throw -1;
 					exit(1);
 				}
 			}
@@ -71,7 +71,7 @@ int main(int argc, char ** argv) {
 					cout << "Elements diff\n";
 					f1.close();
 					f2.close();
-					throw -1;
+					//throw -1;
 					return 1;
 				}
 			}

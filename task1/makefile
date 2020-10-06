@@ -23,7 +23,7 @@ sr.o: sr.cpp
 test: compare main
 	for NUMBER in 0 1 2 3 4 5 ; do \
 		./main "./test/A.dat" "./test/B.dat" "./test/C$$NUMBER.dat" $$NUMBER ; \
-		./compare "./test/C$$NUMBER.dat" "./test/C.dat" ; \
+		./compare "./test/C$$NUMBER.dat" "./test/C.dat"  || exit $(.SHELLSTATUS) ; \
 	done
 	rm -f ./test/C0.dat ./test/C1.dat ./test/C2.dat ./test/C3.dat ./test/C4.dat ./test/C5.dat
 report: generate main sr
