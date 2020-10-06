@@ -10,7 +10,8 @@ const double eps = DBL_EPSILON;
 
 int main(int argc, char ** argv) {
 	if (argc != 3) {
-		cerr << "Format: A.dat B.dat" << endl;
+		cout << "Format: A.dat B.dat" << endl;
+		throw -1;
 		return 1;
 	}
 	fstream f1, f2;
@@ -21,25 +22,28 @@ int main(int argc, char ** argv) {
 	f1.read((char *) &type1, sizeof(type1));
 	f2.read((char *) &type2, sizeof(type2));
 	if (type1 != type2) {
-		cerr << "Type diff\n";
+		cout << "Type diff\n";
 		f1.close();
 		f2.close();
+		throw -1;
 		return 1;
 	}
 	f1.read((char *) &n, sizeof(n));
 	f2.read((char *) &n1, sizeof(n1));
 	if (n != n1) {
-		cerr << "Size diff\n";
+		cout << "Size diff\n";
 		f1.close();
 		f2.close();
+		throw -1;
 		return 1;
 	}
 	f1.read((char *) &m, sizeof(m));
 	f2.read((char *) &m1, sizeof(m1));
 	if (m != m1) {
-		cerr << "Size diff\n";
+		cout << "Size diff\n";
 		f1.close();
 		f2.close();
+		throw -1;
 		return 1;
 	}
 	if (type1 == 'f') {
@@ -49,10 +53,11 @@ int main(int argc, char ** argv) {
 				f1.read((char *) &tmp1, sizeof(tmp1));
 				f2.read((char *) &tmp2, sizeof(tmp2));
 				if (abs(tmp1 - tmp2) > eps) {
-					cerr << "Elements diff\n";
+					cout << "Elements diff\n";
 					f1.close();
 					f2.close();
-					return 1;
+					throw -1;
+					exit(1);
 				}
 			}
 		}
@@ -63,9 +68,10 @@ int main(int argc, char ** argv) {
 				f1.read((char *) &tmp1, sizeof(tmp1));
 				f2.read((char *) &tmp2, sizeof(tmp2));
 				if (abs(tmp1 - tmp2) > eps) {
-					cerr << "Elements diff\n";
+					cout << "Elements diff\n";
 					f1.close();
 					f2.close();
+					throw -1;
 					return 1;
 				}
 			}
