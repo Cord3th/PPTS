@@ -54,7 +54,7 @@ void mulmatr(fstream &a, fstream &b, fstream &c, int &mode){
 			for (i = 0; i < A_rows; i++) {
 				for (j = 0; j < B_cols; j++) {
 					for (k = 0; k < A_cols; k++) {
-						C[i][j] += A[i][k] * B[k][j] + 1;
+						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
@@ -65,7 +65,7 @@ void mulmatr(fstream &a, fstream &b, fstream &c, int &mode){
 			for (i = 0; i < A_rows; i++) {
 				for (k = 0; k < A_cols; k++) {
 					for (j = 0; j < B_cols; j++) {
-						C[i][j] += A[i][k] * B[k][j];
+						C[i][j] += A[i][k] * B[k][j] + 1;
 					}
 				}
 			}
