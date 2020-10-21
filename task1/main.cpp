@@ -13,6 +13,7 @@ void mulmatr(fstream &a, fstream &b, fstream &c, int &mode){
 	a.read((char *) &A_cols, sizeof(A_cols));
 	b.read((char *) &B_rows, sizeof(B_rows));
 	b.read((char *) &B_cols, sizeof(B_cols));
+	cerr << "A_rows = " << A_rows << " " << "A_cols = " << A_cols << endl;
 	if (A_cols != B_rows) {
 		cerr << "Size incompatibility \n";
 		return;

@@ -13,7 +13,7 @@ generate.o: generate.cpp
 	g++ -c -o generate.o generate.cpp
 main.o: main.cpp
 	g++ -c -o main.o main.cpp
-compare.o: compare.o
+compare.o: compare.cpp
 	g++ -c -o compare.o compare.cpp
 print.o: print.cpp
 	g++ -c -o print.o print.cpp

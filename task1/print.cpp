@@ -1,4 +1,4 @@
-#include <fstream>
+/*#include <fstream>
 #include <iostream>
 #include <iomanip>
 const int w = 8;
@@ -39,3 +39,4 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+*/
