@@ -13,6 +13,7 @@ int main(int argc, char **argv) {
     long long first, last, temp;
     double time_start, time_finish;
     MPI_Status status;
+    vector<double> time;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -21,17 +22,20 @@ int main(int argc, char **argv) {
     sscanf(argv[1], "%llu", &first);
     sscanf(argv[2], "%llu", &last);
 
+    time_start = MPI_Wtime();
     vector<bool> sqrt_primes((int) sqrt(last + 1), true);
-    sqrt_primes[0] = sqrt_primes[1] = false;
 
+    sqrt_primes[0] = sqrt_primes[1] = false;
     for (temp = 2; temp * temp <= last; temp++) {
         if (sqrt_primes[temp]) {
             for (long long j = temp * temp; j * j <= last; j += temp) {
                 sqrt_primes[j] = false;
             }
         }
-
     }
+
+    time_finish = MPI_Wtime();
+    time.push_back(time_finish - time_start);
 
     long long i_first = (long long) (rank - 1)
                        * (last - max(first, temp) + 1)
@@ -47,14 +51,11 @@ int main(int argc, char **argv) {
         vector<bool> i_primes(i_last - i_first + 1, true);
         long long i;
 
-        for (i = i_first; i <= min(i_last, last); i++) {
-            for (long long j = 2; j * j <= last; j++) {
-                if (sqrt_primes[j] && (i % j == 0)) {
-                    i_primes[i - i_first] = false;
-                }
+        for (long long j = 2; j * j <= last; j++) {
+            for (i = (i_first / j + 1 * (i_first % j != 0)) * j; i <= min(i_last, last); i += j) {
+                i_primes[i - i_first] = false;
             }
         }
-
 
         for (i = i_first; i <= min(i_last, last); i++) {
             if (i_primes[i - i_first]) {
@@ -66,20 +67,19 @@ int main(int argc, char **argv) {
         MPI_Send(&i, 1, MPI_LONG_LONG, 0, data_tag, MPI_COMM_WORLD);
 
         time_finish = MPI_Wtime();
-        double time = time_finish - time_start;
-        MPI_Send(&time, 1, MPI_DOUBLE, 0, time_tag, MPI_COMM_WORLD);
-
+        double i_time = time_finish - time_start;
+        MPI_Send(&i_time, 1, MPI_DOUBLE, 0, time_tag, MPI_COMM_WORLD);
     } else {
         int k = 0;
         double sum_time = 0, max_time = 0;
         long long prime_count = 0, size_count = 0;
         vector<long long> remain_primes;
-        vector<double> time;
 
         while (size_count < (size - 1)) {
             long long tmp;
 
             MPI_Recv(&tmp, 1, MPI_LONG_LONG, MPI_ANY_SOURCE, data_tag, MPI_COMM_WORLD, &status);
+            
             if (tmp != -1) {
                 remain_primes.push_back(tmp);
                 prime_count++;
