@@ -13,7 +13,6 @@ int main(int argc, char **argv) {
     long long first, last, temp;
     double time_start, time_finish;
     MPI_Status status;
-    vector<double> time;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -35,25 +34,27 @@ int main(int argc, char **argv) {
     }
 
     time_finish = MPI_Wtime();
-    time.push_back(time_finish - time_start);
+    double sqrt_time = time_finish - time_start;
 
     long long i_first = (long long) (rank - 1)
                        * (last - max(first, temp) + 1)
                        / (size - 1)
-                       + max(first, temp);
-    long long i_last = (long long) rank
-                     * (last - max(first, temp) + 1)
-                     / (size - 1)
-                     + max(first, temp) - 1;
+                       + max(first, temp),
+    i_last = (long long) rank
+             * (last - max(first, temp) + 1)
+             / (size - 1)
+             + max(first, temp) - 1;
 
     if (rank) {
         time_start = MPI_Wtime();
         vector<bool> i_primes(i_last - i_first + 1, true);
         long long i;
-
         for (long long j = 2; j * j <= last; j++) {
-            for (i = (i_first / j + 1 * (i_first % j != 0)) * j; i <= min(i_last, last); i += j) {
-                i_primes[i - i_first] = false;
+            if (sqrt_primes[j]) {
+                for (i = (i_first / j + 1 * (i_first % j != 0)) * j;
+                     i <= min(i_last, last); i += j) {
+                    i_primes[i - i_first] = false;
+                }
             }
         }
 
@@ -74,12 +75,13 @@ int main(int argc, char **argv) {
         double sum_time = 0, max_time = 0;
         long long prime_count = 0, size_count = 0;
         vector<long long> remain_primes;
+        vector<double> time;
 
         while (size_count < (size - 1)) {
             long long tmp;
 
             MPI_Recv(&tmp, 1, MPI_LONG_LONG, MPI_ANY_SOURCE, data_tag, MPI_COMM_WORLD, &status);
-            
+
             if (tmp != -1) {
                 remain_primes.push_back(tmp);
                 prime_count++;
@@ -107,7 +109,6 @@ int main(int argc, char **argv) {
 
         cout << "There are " << prime_count << " primes" << endl;
 
-
         for (k = 1; k < size; k++) {
             sum_time += time[k - 1];
             if (time[k - 1] > max_time) {
@@ -116,6 +117,7 @@ int main(int argc, char **argv) {
         }
 
         cout << "Overall time: " << sum_time << endl
+             << "First sqrt(last) items time: " << sqrt_time << endl
              << "Maximal single process time: " << max_time << endl;
     }
 

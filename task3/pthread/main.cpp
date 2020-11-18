@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <vector>
 #include <fstream>
@@ -12,56 +11,58 @@ using namespace std;
 
 pthread_mutex_t mutex;
 
-struct smpl{
-    long long start;
-    long long end;
+struct smpl {
+    long long first;
+    long long last;
     int size;
     int rank;
-    int count;
+    int prime_count;
     double time;
-    std::vector<bool> * prime;
+    std::vector<bool> *primes;
     char *file;
-    smpl(int s = 1 , int r = 1, int c = 0, long long st = 0,
-         long long e = 1, double t = 0, std::vector<bool> *p = NULL,
+    smpl(int s = 1, int r = 1, int c = 0, long long fr = 0,
+         long long l = 1, double t = 0, vector<bool> *p = NULL,
          char *f = 0) {
         size = s;
         rank = r;
-        count = c;
-        start = st;
-        end = e;
+        prime_count = c;
+        first = fr;
+        last = l;
         time = t;
-        prime = p;
+        primes = p;
         file = f;
     }
 };
 
 void *worker(void *atr) {
-
     smpl *a = (smpl*) atr;
-    long long ibegin = (long long) (a->rank - 1) * (a->end - a->start + 1)
-                        / (a->size - 1) + a->start;
-    long long iend = (long long ) a->rank * (a->end - a->start + 1)
-                      / (a->size - 1) + a->start- 1;
-    std::vector<bool> prime1(iend - ibegin + 1, true);
-    timespec time_start;
-    timespec time_finish;
+    long long i_first = (long long) (a->rank - 1)
+                        * (a->last - a->first + 1)
+                        / (a->size - 1)
+                        + a->first,
+    i_last = (long long ) a->rank
+             * (a->last - a->first + 1)
+             / (a->size - 1)
+             + a->first- 1;
+    vector<bool> i_primes(i_last - i_first + 1, true);
+    timespec time_start, time_finish;
+
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time_start);
 
-    for (long long j = 2; j * j <= a->end; j++) {
-        if((*(*a).prime)[j]) {
-            for (long long i = (ibegin / j + 1 * (ibegin % j != 0)) * j;
-                i <= min(iend, a->end); i += j) {
-                prime1[i - ibegin] = false;
+    for (long long j = 2; j * j <= a->last; j++) {
+        if ((*(*a).primes)[j]) {
+            for (long long i = (i_first / j + 1 * (i_first % j != 0)) * j;
+                i <= min(i_last, a->last); i += j) {
+                i_primes[i - i_first] = false;
             }
         }
-
     }
 
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time_finish);
-    for (long long i = ibegin; i <= min(iend, a->end); i++) {
 
-        if (prime1[i - ibegin]) {
-            a->count = a->count + 1;
+    for (long long i = i_first; i <= min(i_last, a->last); i++) {
+        if (i_primes[i - i_first]) {
+            a->prime_count = a->prime_count + 1;
         }
     }
     a->time = double (time_finish.tv_sec - time_start.tv_sec
@@ -71,52 +72,61 @@ void *worker(void *atr) {
 
 
 int main(int argc, char **argv) {
-
-    long long begin, end;
-    pthread_mutex_init(&mutex, NULL);
-    sscanf(argv[1], "%llu", &begin);
-    sscanf(argv[2], "%llu", &end);
-    int numthread;
-    sscanf(argv[4], "%d", &numthread);
-    std::vector<bool> prime((int) sqrt(end + 1.0), true);
-    prime[0] = prime[1] = false;
-    long long temp;
-    int count = 0;
+    double max_time = 0, sum_time = 0;
+    long long fisrt, last, temp;
+    int num_thread, prime_count = 0;
     ofstream fout(argv[3]);
-    for (temp = 2; temp * temp <= end; temp++) {
-        if (prime[temp]) {
-            for (long long j = temp * temp; j * j <= end; j += temp ) {
-                prime[j] = false;
+
+    pthread_mutex_init(&mutex, NULL);
+
+    sscanf(argv[1], "%llu", &fisrt);
+    sscanf(argv[2], "%llu", &last);
+    sscanf(argv[4], "%d", &num_thread);
+
+    pthread_t thread_id[num_thread];
+    smpl param[num_thread];
+    vector<bool> primes((int) sqrt(last + 1.0), true);
+
+    primes[0] = primes[1] = false;
+
+    for (temp = 2; temp * temp <= last; temp++) {
+        if (primes[temp]) {
+            for (long long j = temp * temp; j * j <= last; j += temp ) {
+                primes[j] = false;
             }
         }
-
     }
-    for (long long j = max(begin, (long long) 2); j * j <= end; j++) {
-        if (prime[j]) {
-            count++;
+
+    for (long long j = max(fisrt, (long long) 2); j * j <= last; j++) {
+        if (primes[j]) {
+            prime_count++;
             fout << j << endl;
         }
     }
+
     fout.close();
-    pthread_t tid[numthread];
-    smpl param[numthread];
-    for (int i = 0; i < numthread; i++) {
-        param[i] = smpl(numthread + 1, i + 1, 0, max(begin, temp), end, 0, &prime, argv[3]);
-        pthread_create(&tid[i], NULL, worker, &param[i]);
+
+    for (int i = 0; i < num_thread; i++) {
+        param[i] = smpl(num_thread + 1, i + 1, 0, max(fisrt, temp),
+                        last, 0, &primes, argv[3]);
+        pthread_create(&thread_id[i], NULL, worker, &param[i]);
     }
-    double maxtime = 0;
-    double sumtime = 0;
-    for (int i = 0; i < numthread; i++) {
-        smpl *smtemp;
-        pthread_join(tid[i],(void **) &smtemp);
-        count += smtemp->count;
-        sumtime += smtemp->time;
-        if (smtemp->time > maxtime) {
-        	maxtime = smtemp->time;
+
+    for (int i = 0; i < num_thread; i++) {
+        smpl *sm_temp;
+        pthread_join(thread_id[i], (void **) &sm_temp);
+        prime_count += sm_temp->prime_count;
+        sum_time += sm_temp->time;
+        if (sm_temp->time > max_time) {
+        	max_time = sm_temp->time;
         }
     }
-    cout << count << endl;
-    cout << "maxtime: " << maxtime << endl << "sumtime: " << sumtime << endl;
+
+    cout << "There are " << prime_count << " primes" << endl
+         << "Overall time: " << sum_time << endl
+         << "Maximal single process time: " << max_time << endl;
+
     pthread_mutex_destroy(&mutex);
+
     return 0;
 }
