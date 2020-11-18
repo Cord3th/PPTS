@@ -4,120 +4,103 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
+#include <stdlib.h>
 
 using namespace std;
 
 int main(int argc, char **argv) {
-    int rank, size;
+    int rank, size, first = atoi(argv[1]), last = atoi(argv[2]),
+        sqrt_last = sqrt(last), i_min = max(first - 1, sqrt_last);
     const int data_tag = 1, time_tag = 2;
-    long long first, last, temp;
     double time_start, time_finish;
     MPI_Status status;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Barrier(MPI_COMM_WORLD);
 
-    sscanf(argv[1], "%llu", &first);
-    sscanf(argv[2], "%llu", &last);
-
+    vector<int> sqrt_primes(sqrt_last);
     time_start = MPI_Wtime();
-    vector<bool> sqrt_primes((int) sqrt(last + 1), true);
 
-    sqrt_primes[0] = sqrt_primes[1] = false;
-    for (temp = 2; temp * temp <= last; temp++) {
-        if (sqrt_primes[temp]) {
-            for (long long j = temp * temp; j * j <= last; j += temp) {
-                sqrt_primes[j] = false;
+    sqrt_primes[0] = 0;
+    for (size_t i = 1; i < sqrt_last; i++) {
+        sqrt_primes[i] = i + 1;
+    }
+
+    for (size_t i = 1; i < sqrt_last; i++) {
+        if (sqrt_primes[i]) {
+            for (int j = i + sqrt_primes[i]; j < sqrt_last; j += sqrt_primes[i]) {
+                sqrt_primes[j] = 0;
             }
         }
     }
 
-    time_finish = MPI_Wtime();
-    double sqrt_time = time_finish - time_start;
+    int step = (last - i_min) / size
+               + ((last - i_min) % size != 0),
+        i_first = i_min + rank * step + 1;
 
-    long long i_first = (long long) (rank - 1)
-                       * (last - max(first, temp) + 1)
-                       / (size - 1)
-                       + max(first, temp),
-    i_last = (long long) rank
-             * (last - max(first, temp) + 1)
-             / (size - 1)
-             + max(first, temp) - 1;
-
-    if (rank) {
-        time_start = MPI_Wtime();
-        vector<bool> i_primes(i_last - i_first + 1, true);
-        long long i;
-        for (long long j = 2; j * j <= last; j++) {
-            if (sqrt_primes[j]) {
-                for (i = (i_first / j + 1 * (i_first % j != 0)) * j;
-                     i <= min(i_last, last); i += j) {
-                    i_primes[i - i_first] = false;
-                }
-            }
-        }
-
-        for (i = i_first; i <= min(i_last, last); i++) {
-            if (i_primes[i - i_first]) {
-                MPI_Send(&i, 1, MPI_LONG_LONG, 0, data_tag, MPI_COMM_WORLD);
-            }
-        }
-
-        i = -1;
-        MPI_Send(&i, 1, MPI_LONG_LONG, 0, data_tag, MPI_COMM_WORLD);
-
-        time_finish = MPI_Wtime();
-        double i_time = time_finish - time_start;
-        MPI_Send(&i_time, 1, MPI_DOUBLE, 0, time_tag, MPI_COMM_WORLD);
-    } else {
-        int k = 0;
-        double sum_time = 0, max_time = 0;
-        long long prime_count = 0, size_count = 0;
-        vector<long long> remain_primes;
-        vector<double> time;
-
-        while (size_count < (size - 1)) {
-            long long tmp;
-
-            MPI_Recv(&tmp, 1, MPI_LONG_LONG, MPI_ANY_SOURCE, data_tag, MPI_COMM_WORLD, &status);
-
-            if (tmp != -1) {
-                remain_primes.push_back(tmp);
-                prime_count++;
+    int i_primes[step], i_max = min(i_first + step, last);
+    for (int i = 0;
+        i < step;
+        i++) {
+            if ((i + i_first) < i_max) {
+                i_primes[i] = i + i_first;
             } else {
-                double tmptime;
-                MPI_Recv(&tmptime, 1, MPI_DOUBLE, MPI_ANY_SOURCE, time_tag, MPI_COMM_WORLD, &status);
-                time.push_back(tmptime);
-                size_count++;
+                i_primes[i] = 0;
             }
-        }
+    }
 
+    for (int i = 0; i < sqrt_last; i++) {
+        if (sqrt_primes[i]) {
+            for (int j = (i_first / sqrt_primes[i] + 1 * (i_first % sqrt_primes[i] != 0)) * sqrt_primes[i] - 1;
+                j < i_max; j += sqrt_primes[i]) {
+                    i_primes[j - i_first + 1] = 0;
+                }
+        }
+    }
+
+    time_finish = MPI_Wtime();
+    if (rank) {
+        MPI_Send(i_primes, step, MPI_INT, 0, data_tag, MPI_COMM_WORLD);
+        double time = time_finish - time_start;
+        MPI_Send(&time, 1, MPI_DOUBLE, 0, time_tag, MPI_COMM_WORLD);
+    } else {
         ofstream out;
         out.open(argv[3]);
-
-        for (long long i = 0; i < prime_count; i++) {
-            out << remain_primes[i] << '\n';
-        }
-
-        for (temp = first; temp * temp <= last; temp++) {
-            if (sqrt_primes[temp]) {
-                out << temp << '\n';
+        long long prime_count = 0;
+        double sum_time = time_finish - time_start, max_time = sum_time;
+        for (int i = first - 1; i < sqrt_last; i++) {
+            if (sqrt_primes[i]) {
+                out << sqrt_primes[i] << '\n';
                 prime_count++;
             }
         }
-
-        cout << "There are " << prime_count << " primes" << endl;
-
-        for (k = 1; k < size; k++) {
-            sum_time += time[k - 1];
-            if (time[k - 1] > max_time) {
-                max_time = time[k - 1];
+        for (int i = 0; i < step; i++) {
+            if (i_primes[i]) {
+                out << i_primes[i] << '\n';
+                prime_count++;
             }
         }
+        for (int i = 0; i < size - 1; i++) {
+			MPI_Recv(i_primes, step, MPI_INT, MPI_ANY_SOURCE, data_tag, MPI_COMM_WORLD, &status);
+			for (int j = 0; j < step; j++) {
+                if (i_primes[j]) {
+                    prime_count++;
+                    out << i_primes[j] << '\n';
+                }
+            }
+		}
+        for (int i = 0; i < size - 1; i++) {
+			double time;
+			MPI_Recv(&time, 1, MPI_DOUBLE, MPI_ANY_SOURCE, time_tag, MPI_COMM_WORLD, &status);
+			if (time > max_time)
+				max_time = time;
+			sum_time += time;
+		}
 
-        cout << "Overall time: " << sum_time << endl
-             << "First sqrt(last) items time: " << sqrt_time << endl
+        cout << "There are " << prime_count << " primes" << endl
+             << "Overall time: " << sum_time << endl
              << "Maximal single process time: " << max_time << endl;
     }
 
