@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
                + ((last - i_min) % size != 0),
         i_first = i_min + rank * step + 1;
 
-    int *i_primes, i_max = min(i_first + step, last);
-    i_primes = new int [step];
+    int *i_primes = (int *) malloc(step * sizeof(int) + 1),
+        i_max = min(i_first + step, last);
     for (int i = 0; i < step; i++) {
         if ((i + i_first) < i_max) {
             i_primes[i] = i + i_first;
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
             i_primes[i] = 0;
         }
     }
-
+    
     for (int i = 0; i < sqrt_last; i++) {
         if (sqrt_primes[i]) {
             for (int j = (i_first / sqrt_primes[i] + 1 * (i_first % sqrt_primes[i] != 0)) * sqrt_primes[i] - 1;
@@ -62,7 +62,6 @@ int main(int argc, char **argv) {
     time_finish = MPI_Wtime();
     if (rank) {
         MPI_Send(i_primes, step, MPI_INT, 0, data_tag, MPI_COMM_WORLD);
-        delete[] i_primes;
         double time = time_finish - time_start;
         MPI_Send(&time, 1, MPI_DOUBLE, 0, time_tag, MPI_COMM_WORLD);
     } else {
@@ -98,7 +97,6 @@ int main(int argc, char **argv) {
 				max_time = time;
 			sum_time += time;
 		}
-        delete[] i_primes;
         cout << prime_count << endl;
         /*cout << "There are " << prime_count << " primes" << endl
              << "Overall time: " << sum_time << endl
