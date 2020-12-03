@@ -75,13 +75,13 @@ int main(int argc, char **argv) {
     double max_time = 0, sum_time = 0;
     long long fisrt, last, temp;
     int num_thread, prime_count = 0;
-    ofstream fout(argv[3]);
+    //ofstream fout(argv[3]);
 
     pthread_mutex_init(&mutex, NULL);
 
     sscanf(argv[1], "%llu", &fisrt);
     sscanf(argv[2], "%llu", &last);
-    sscanf(argv[4], "%d", &num_thread);
+    sscanf(argv[3], "%d", &num_thread);
 
     pthread_t thread_id[num_thread];
     smpl param[num_thread];
@@ -100,11 +100,11 @@ int main(int argc, char **argv) {
     for (long long j = max(fisrt, (long long) 2); j * j <= last; j++) {
         if (primes[j]) {
             prime_count++;
-            fout << j << endl;
+            //fout << j << endl;
         }
     }
 
-    fout.close();
+    //fout.close();
 
     for (int i = 0; i < num_thread; i++) {
         param[i] = smpl(num_thread + 1, i + 1, 0, max(fisrt, temp),

@@ -41,14 +41,12 @@ int main(int argc, char **argv) {
         i_first = i_min + rank * step + 1;
 
     int i_primes[step], i_max = min(i_first + step, last);
-    for (int i = 0;
-        i < step;
-        i++) {
-            if ((i + i_first) < i_max) {
-                i_primes[i] = i + i_first;
-            } else {
-                i_primes[i] = 0;
-            }
+    for (int i = 0; i < step; i++) {
+        if ((i + i_first) < i_max) {
+            i_primes[i] = i + i_first;
+        } else {
+            i_primes[i] = 0;
+        }
     }
 
     for (int i = 0; i < sqrt_last; i++) {
@@ -66,19 +64,19 @@ int main(int argc, char **argv) {
         double time = time_finish - time_start;
         MPI_Send(&time, 1, MPI_DOUBLE, 0, time_tag, MPI_COMM_WORLD);
     } else {
-        ofstream out;
-        out.open(argv[3]);
+        //ofstream out;
+        //out.open(argv[3]);
         long long prime_count = 0;
         double sum_time = time_finish - time_start, max_time = sum_time;
         for (int i = first - 1; i < sqrt_last; i++) {
             if (sqrt_primes[i]) {
-                out << sqrt_primes[i] << '\n';
+                //out << sqrt_primes[i] << '\n';
                 prime_count++;
             }
         }
         for (int i = 0; i < step; i++) {
             if (i_primes[i]) {
-                out << i_primes[i] << '\n';
+                //out << i_primes[i] << '\n';
                 prime_count++;
             }
         }
@@ -87,7 +85,7 @@ int main(int argc, char **argv) {
 			for (int j = 0; j < step; j++) {
                 if (i_primes[j]) {
                     prime_count++;
-                    out << i_primes[j] << '\n';
+                    //out << i_primes[j] << '\n';
                 }
             }
 		}
