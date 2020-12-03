@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
     time_finish = MPI_Wtime();
     if (rank) {
         MPI_Send(i_primes, step, MPI_INT, 0, data_tag, MPI_COMM_WORLD);
+        delete[] i_primes;
         double time = time_finish - time_start;
         MPI_Send(&time, 1, MPI_DOUBLE, 0, time_tag, MPI_COMM_WORLD);
     } else {
@@ -97,6 +98,7 @@ int main(int argc, char **argv) {
 				max_time = time;
 			sum_time += time;
 		}
+        delete[] i_primes;
         cout << prime_count << endl;
         /*cout << "There are " << prime_count << " primes" << endl
              << "Overall time: " << sum_time << endl
