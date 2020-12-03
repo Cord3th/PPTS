@@ -40,7 +40,8 @@ int main(int argc, char **argv) {
                + ((last - i_min) % size != 0),
         i_first = i_min + rank * step + 1;
 
-    int i_primes[step], i_max = min(i_first + step, last);
+    int *i_primes, i_max = min(i_first + step, last);
+    i_primes = new int [step];
     for (int i = 0; i < step; i++) {
         if ((i + i_first) < i_max) {
             i_primes[i] = i + i_first;

@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < num_thread; i++) {
         param[i] = smpl(num_thread + 1, i + 1, 0, max(fisrt, temp),
-                        last, 0, &primes, argv[3]);
+                        last, 0, &primes/*, argv[3]*/);
         pthread_create(&thread_id[i], NULL, worker, &param[i]);
     }
 
