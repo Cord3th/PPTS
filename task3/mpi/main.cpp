@@ -98,10 +98,10 @@ int main(int argc, char **argv) {
 				max_time = time;
 			sum_time += time;
 		}
-
-        cout << "There are " << prime_count << " primes" << endl
+        cout << prime_count << endl;
+        /*cout << "There are " << prime_count << " primes" << endl
              << "Overall time: " << sum_time << endl
-             << "Maximal single process time: " << max_time << endl;
+             << "Maximal single process time: " << max_time << endl;*/
     }
 
     MPI_Finalize();

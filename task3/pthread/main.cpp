@@ -121,10 +121,10 @@ int main(int argc, char **argv) {
         	max_time = sm_temp->time;
         }
     }
-
-    cout << "There are " << prime_count << " primes" << endl
+    cout << prime_count << endl;
+    /*cout << "There are " << prime_count << " primes" << endl
          << "Overall time: " << sum_time << endl
-         << "Maximal single process time: " << max_time << endl;
+         << "Maximal single process time: " << max_time << endl;*/
 
     pthread_mutex_destroy(&mutex);
 
