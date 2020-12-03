@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 		input_file.read((char *) &m, sizeof(m));
 		input_file.read((char *) &n, sizeof(n));
 
-		cout << "m = " << m <<" n = " << n << " size = " << size << endl;
+		//cout << "m = " << m <<" n = " << n << " size = " << size << endl;
 
 		int sizes[2];
 		sizes[1] = n;
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     					input_file.read((char *) &temp[i - begin][j],
 										sizeof(temp[i - begin][j]));
     				}
-    				MPI_Send(&temp[i-begin][0], n, MPI_DOUBLE, k, data_tag, MPI_COMM_WORLD);
+    				MPI_Send(&temp[i - begin][0], n, MPI_DOUBLE, k, data_tag, MPI_COMM_WORLD);
     			}
     		}
 
@@ -236,6 +236,10 @@ int main(int argc, char **argv) {
     MPI_Reduce(&time, &max_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
     if (rank == 0 ) {
+		for (size_t i = 0; i < n; i++) {
+			delete[] a[i];
+		}
+		delete[] a;
     	cout << "Overall time :" << sum_time << endl;
     	cout << "Maximal single process time :" << max_time << endl;
     }
