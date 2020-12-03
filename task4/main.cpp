@@ -106,9 +106,11 @@ int main(int argc, char **argv) {
     			c_output_file.write((char *) &c[i], sizeof(c[i]));
     		}
     	} else {
-    		double a[m][n], b[b_m];
+    		double **a, b[b_m];
+			a = new double *[n];
 
     		for (int i = 0; i < m; i++) {
+				a[i] = new double[n];
     			for (int j = 0; j < n; j++) {
     				input_file.read((char *) &a[i][j], sizeof(a[i][j]));
     			}
