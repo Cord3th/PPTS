@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
                + ((last - i_min) % size != 0),
         i_first = i_min + rank * step + 1;
 
-    int *i_primes = (int *) malloc(step * sizeof(int) + 1),
+    int *i_primes = new int[step + 1],
         i_max = min(i_first + step, last);
     for (int i = 0; i < step; i++) {
         if ((i + i_first) < i_max) {
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
             i_primes[i] = 0;
         }
     }
-    
+
     for (int i = 0; i < sqrt_last; i++) {
         if (sqrt_primes[i]) {
             for (int j = (i_first / sqrt_primes[i] + 1 * (i_first % sqrt_primes[i] != 0)) * sqrt_primes[i] - 1;
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
              << "Overall time: " << sum_time << endl
              << "Maximal single process time: " << max_time << endl;*/
     }
-
+    delete[] i_primes;
     MPI_Finalize();
 
     return 0;
