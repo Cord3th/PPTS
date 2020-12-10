@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstdint>
 #include <string>
+#include <climits>
 #include <cstdlib>
 #include <ctime>
 
@@ -31,10 +32,10 @@ int main(int argc, char ** argv) {
 	for (uint64_t i = 0 ; i < n; i++) {
 		for (uint64_t j = 0; j < m; j++) {
 			if (*type == 'f') {
-				float temp = ((float) rand() / (RAND_MAX + 1));
+				float temp = ((float) rand() / (RAND_MAX));
 				file.write((char *) &temp, sizeof(temp));
 			} else if (*type == 'd') {
-				double temp = ((double) rand() / (RAND_MAX + 1));
+				double temp = ((double) rand() / (RAND_MAX));
 				file.write((char *) &temp, sizeof(temp));
 			} else {
 				cerr << "Format: Type (f/d) n m fout.dat" << endl;
