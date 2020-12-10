@@ -167,6 +167,10 @@ int main(int argc, char **argv) {
 	    	for (int i = 0; i < m; i++) {
 	    		c_output_file.write((char *) &c1[i], sizeof(c[i]));
 			}
+			for (size_t i = 0; i < n; i++) {
+				delete[] a[i];
+			}
+			delete[] a;
     	}
 
     } else {
@@ -235,11 +239,8 @@ int main(int argc, char **argv) {
     MPI_Reduce(&time, &sum_time, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(&time, &max_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
-    if (rank == 0 ) {
-		for (size_t i = 0; i < n; i++) {
-			delete[] a[i];
-		}
-		delete[] a;
+    if (rank == 0) {
+
     	cout << "Overall time :" << sum_time << endl;
     	cout << "Maximal single process time :" << max_time << endl;
     }
