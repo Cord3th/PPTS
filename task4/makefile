@@ -1,11 +1,11 @@
 main: main.cpp
-	mpicxx -O3 -o main main.cpp
+	mpicxx -Wall -Werror -O3 -o main main.cpp
 generate: generate.cpp
-	g++ -O3 -o generate -std=c++11 generate.cpp
+	g++ -Wall -Werror -O3 -o generate -std=c++11 generate.cpp
 print: print.cpp
-	g++ -O3 -o print -std=c++11 print.cpp
+	g++ -Wall -Werror -O3 -o print -std=c++11 print.cpp
 random: random.cpp
-	g++ -O3 -o random random.cpp
+	g++ -Wall -Werror -O3 -o random random.cpp
 
 
 genmatr: generate
