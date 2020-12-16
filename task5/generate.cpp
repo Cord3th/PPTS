@@ -14,7 +14,7 @@ int main(int argc, char ** argv) {
 	}
 
 	char *type = argv[1];
-	uint64_t n,m;
+	uint64_t n, m;
 	string filename(argv[4]);
 	fstream file;
 
@@ -27,14 +27,14 @@ int main(int argc, char ** argv) {
 	file.write(type, sizeof(char));
 	file.write((char *) &n, sizeof(n));
 	file.write((char *) &m, sizeof(m));
-	
+
 	for (uint64_t i = 0 ; i < n; i++) {
 		for (uint64_t j = 0; j < m; j++) {
 			if (*type == 'f') {
-				float temp = ((float) rand() / (RAND_MAX + 1));
+				float temp = ((float) rand() / (RAND_MAX));
 				file.write((char *) &temp, sizeof(temp));
 			} else if (*type == 'd') {
-				double temp = ((double) rand() / (RAND_MAX + 1));
+				double temp = ((double) rand() / (RAND_MAX));
 				file.write((char *) &temp, sizeof(temp));
 			} else {
 				cerr << "Format: Type (f/d) n m fout.dat" << endl;

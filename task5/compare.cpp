@@ -11,7 +11,7 @@ const double eps = 0.00001;
 int main(int argc, char ** argv) {
 	if (argc != 3) {
 		cout << "Format: A.dat B.dat" << endl;
-		throw -1;
+		//throw -1;
 		return 1;
 	}
 	fstream f1, f2;

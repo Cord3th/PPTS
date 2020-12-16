@@ -131,6 +131,7 @@ int main(int argc, char **argv) {
     				for (int i = 0; i < m; i++) {
     					temp[j - begin][i] = a[i][j];
     				}
+
     				MPI_Send(&temp[j - begin][0], m, MPI_DOUBLE, k, data_tag, MPI_COMM_WORLD);
     			}
 
@@ -167,6 +168,7 @@ int main(int argc, char **argv) {
 	    	for (int i = 0; i < m; i++) {
 	    		c_output_file.write((char *) &c1[i], sizeof(c[i]));
 			}
+			
 			for (size_t i = 0; i < n; i++) {
 				delete[] a[i];
 			}
