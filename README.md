@@ -1,6 +1,7 @@
 # PPTS
 Parallel programming tools and systems
-
-Запуск решета на MPI с помощью mpisubmit.pl -p [количество процессов] main -- 1 100000000 out.txt 
-Запуск решета на Pthread с помощью bsub -o stdout.txt ./main 1 100000000 out.txt [количество тредов]
-Мейкфайл только на сборку
+Task 1 -- Cache impact analysis on matrix multiplication
+Task 2 -- PAPI usage to Monitor CPU Hardware Sensors in Block Matrix Multiplication
+Task 3 -- Parallel algorithm for searching prime numbers using the Eratosthenes sieve
+Task 4 -- Parallel algorithm for matrix-vector multiplication
+Task 5 -- Parallel DNS matrix multiplication algorithm
